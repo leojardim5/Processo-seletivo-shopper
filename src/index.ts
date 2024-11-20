@@ -18,3 +18,5 @@ server.get('/', (req: Request, res: Response) => {
 server.listen(3030, () => {
     console.log('Servidor rodando na porta 3030');
 });
+
+
