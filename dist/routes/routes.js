@@ -6,5 +6,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const controller_1 = __importDefault(require("../controller/controller"));
 const routes = (0, express_1.default)();
-routes.post('/', (req, res) => controller_1.default.upload(req, res));
+routes.post('/ride', (req, res, next) => controller_1.default.requestRide(req, res, next));
 exports.default = routes;

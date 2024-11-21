@@ -13,47 +13,87 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
+const apiKey = "AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4";
+const utilsController_1 = __importDefault(require("./utilsController"));
 const funcaoControllers = {
-    upload: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-        const data = {
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: req.body.mensagem
-                        }
-                    ]
-                }
-            ]
-        };
-        const config = {
-            headers: {
-                'Content-Type': 'application/json'
+    requestRide: (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+        try {
+            const { customer_id, origin, destination } = req.body;
+            if (!origin || origin.trim() === "") {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "O endereço de origem não pode estar vazio.",
+                });
+                return;
             }
-        };
-        axios_1.default.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAvot91yFsr4Gkw9dJ4nAtILsJgnKVaAoQ', data, config)
-            .then(response => {
-            console.log(response.data);
-        })
-            .catch(error => {
-            console.error('Error:', error);
-        });
-        // const { image, customer_code, measure_datetime, measure_type }: RequestBody = req.body
-        // const { value, error } = validateRequestBody(req.body)
-        // if (error) {
-        //     res.status(400).json({
-        //         error_code: 'INVALID_DATA',
-        //         error_description: error
-        //     })
-        // }
-        // if (findDuplicates(req.body)) {
-        //     res.status(409).json({
-        //         error_code: "DOUBLE_REPORT",
-        //         error_description: "Leitura do mês já realizada"
-        //     })
-        // }
-        res.status(200).json();
-        // Aqui sao os dados retornado})
+            if (!destination || destination.trim() === "") {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "O endereço de destino não pode estar vazio.",
+                });
+                return;
+            }
+            if (!customer_id || customer_id.trim() === "") {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "O ID do usuário não pode estar vazio.",
+                });
+                return;
+            }
+            if (origin.trim() === destination.trim()) {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "Os endereços de origem e destino não podem ser os mesmos.",
+                });
+                return;
+            }
+            const { lat: originLat, lng: originLng } = yield utilsController_1.default.findCoordenadas(origin);
+            const { lat: destinationLat, lng: destinationLng } = yield utilsController_1.default.findCoordenadas(destination);
+            const response = yield axios_1.default.post(`https://routes.googleapis.com/directions/v2:computeRoutes?key=${apiKey}`, {
+                origin: {
+                    location: {
+                        latLng: {
+                            latitude: originLat,
+                            longitude: originLng,
+                        },
+                    },
+                },
+                destination: {
+                    location: {
+                        latLng: {
+                            latitude: destinationLat,
+                            longitude: destinationLng,
+                        },
+                    },
+                },
+            }, {
+                headers: {
+                    "X-Goog-FieldMask": "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline,routes.legs",
+                    "Content-Type": "application/json",
+                },
+            });
+            const respostaFinal = {
+                origin: {
+                    latitude: originLat,
+                    longitude: originLng,
+                },
+                destination: {
+                    latitude: destinationLat,
+                    longitude: destinationLng,
+                },
+                distance: response.data.routes[0].distanceMeters,
+                duration: response.data.routes[0].duration,
+                routeResponse: response.data,
+            };
+            res.status(200).json(utilsController_1.default.moldeDeRetornoCorrida(respostaFinal));
+        }
+        catch (error) {
+            console.error("Erro desconhecido:", error);
+            res.status(500).json({
+                error_code: "GOOGLE_API_ERROR",
+                error_description: "Ocorreu um erro desonhecido com o serviço."
+            });
+        }
     })
 };
 exports.default = funcaoControllers;

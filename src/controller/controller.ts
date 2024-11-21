@@ -1,79 +1,106 @@
-import express, { Response, Request } from 'express'
-import RequestBody from './requestInterface'
-import validateRequestBody from './validate'
-import findByCustomerCode from '../model/modelMockado'
-import findDuplicates from '../model/modelMockado'
-import axios from 'axios'
+import { Request, Response, NextFunction } from "express";
+import axios, { AxiosError } from 'axios';
+const apiKey = "AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4"
+import utils from "./utilsController";
+import {RoutesApiResponse } from "./interfacesController";
 
 
 const funcaoControllers = {
+    requestRide: async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const { customer_id, origin, destination } = req.body;
 
-
-    upload: async (req: Request, res: Response) => {
-       
-        const data = {
-            contents: [
-                {
-                    parts: [
-                        {
-                            text: req.body.mensagem
-                        }
-                    ]
-                }
-            ]
-        };
-
-        const config = {
-            headers: {
-                'Content-Type': 'application/json'
+            if (!origin || origin.trim() === "") {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "O endereço de origem não pode estar vazio.",
+                });
+                return
             }
-        };
+            if (!destination || destination.trim() === "") {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "O endereço de destino não pode estar vazio.",
+                });
+                return
+            }
+            if (!customer_id || customer_id.trim() === "") {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "O ID do usuário não pode estar vazio.",
+                });
+                return
+            }
+            if (origin.trim() === destination.trim()) {
+                res.status(400).json({
+                    error_code: "INVALID_DATA",
+                    error_description: "Os endereços de origem e destino não podem ser os mesmos.",
+                });
+                return
+            }
 
-        axios.post('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyAvot91yFsr4Gkw9dJ4nAtILsJgnKVaAoQ', data, config)
-            .then(response => {
-                console.log(response.data);
-            })
-            .catch(error => {
-                console.error('Error:', error);
+            const { lat: originLat, lng: originLng } = await utils.findCoordenadas(origin);
+            const { lat: destinationLat, lng: destinationLng } = await utils.findCoordenadas(destination);
+
+
+            const response = await axios.post(
+                `https://routes.googleapis.com/directions/v2:computeRoutes?key=${apiKey}`,
+                {
+                    origin: {
+                        location: {
+                            latLng: {
+                                latitude: originLat,
+                                longitude: originLng,
+                            },
+                        },
+                    },
+                    destination: {
+                        location: {
+                            latLng: {
+                                latitude: destinationLat,
+                                longitude: destinationLng,
+                            },
+                        },
+                    },
+                },
+                {
+                    headers: {
+                        "X-Goog-FieldMask": "routes.distanceMeters,routes.duration,routes.polyline.encodedPolyline,routes.legs",
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            
+
+            const respostaFinal: RoutesApiResponse = {
+                origin: {
+                    latitude: originLat,
+                    longitude: originLng,
+                }, 
+                destination: {
+                    latitude: destinationLat,
+                    longitude: destinationLng,
+                }, 
+                distance: response.data.routes[0].distanceMeters, 
+                duration: response.data.routes[0].duration,
+                routeResponse:response.data,
+                
+            }
+
+            
+            res.status(200).json(utils.moldeDeRetornoCorrida(respostaFinal))
+
+        } catch (error) {
+            console.error("Erro desconhecido:", error);
+            res.status(500).json({
+                error_code: "GOOGLE_API_ERROR",
+                error_description: "Ocorreu um erro desonhecido com o serviço."
             });
-
-
-        // const { image, customer_code, measure_datetime, measure_type }: RequestBody = req.body
-
-        // const { value, error } = validateRequestBody(req.body)
-
-        // if (error) {
-
-        //     res.status(400).json({
-
-        //         error_code: 'INVALID_DATA',
-        //         error_description: error
-
-        //     })
-
-        // }
-
-
-
-        // if (findDuplicates(req.body)) {
-
-        //     res.status(409).json({
-
-        //         error_code: "DOUBLE_REPORT",
-        //         error_description: "Leitura do mês já realizada"
-
-        //     })
-
-        // }
-
-        res.status(200).json()
-
-            // Aqui sao os dados retornado})
+        }
 
     }
-
-
-
 }
 
-export default funcaoControllers
+
+export default funcaoControllers;

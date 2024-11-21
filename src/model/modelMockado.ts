@@ -1,72 +1,34 @@
-import RequestBody from "../controller/requestInterface";
-
-const testUploads = [
+const motoristas = [
     {
-      image: 'dGVzdGltYWdl', // Base64 válida
-      customer_code: 'CUST001',
-      measure_datetime: '2024-11-19T12:00:00Z', // ISO 8601 válida
-      measure_type: 'WATER', // Valor válido
-      description: 'Caso válido: Leitura de WATER para CUST001',
+        id: 1,
+        nome: "Homer Simpson",
+        descricao: "Olá! Sou o Homer, seu motorista camarada! Relaxe e aproveite o passeio, com direito a rosquinhas e boas risadas (e talvez alguns desvios).",
+        carro: "Plymouth Valiant 1973 rosa e enferrujado",
+        avaliacao: "2/5",
+        comentario: "Motorista simpático,mas errou o caminho 3 vezes. O carro cheira a donuts.",
+        taxaPorKm: 2.50,
+        kmMinimo: 1
     },
     {
-      image: 'dGVzdGltYWdl', // Base64 válida
-      customer_code: 'CUST002',
-      measure_datetime: '2024-11-19T12:00:00Z',
-      measure_type: 'GAS', // Valor válido
-      description: 'Caso válido: Leitura de GAS para CUST002',
+        id: 2,
+        nome: "Dominic Toretto",
+        descricao: "Ei, aqui é o Dom. Pode entrar, vou te levar com segurança e rapidez ao seu destino. Só não mexa no rádio, a playlist é sagrada.",
+        carro: "Dodge Charger R/T 1970 modificado",
+        avaliacao: "4/5",
+        comentario: "Que viagem incrível! carro é um show à partee o motorista, apesar deter uma cara de poucos amigos, foi super gente boa. Recomendo!",
+        taxaPorKm: 5.00,
+        kmMinimo: 5
     },
     {
-      image: 'notbase64', // Base64 inválida
-      customer_code: 'CUST003',
-      measure_datetime: '2024-11-19T12:00:00Z',
-      measure_type: 'WATER',
-      description: 'Erro: Base64 inválida para CUST003',
-    },
-    {
-      image: 'dGVzdGltYWdl',
-      customer_code: 'CUST004',
-      measure_datetime: 'invalid-date', // Data inválida
-      measure_type: 'WATER',
-      description: 'Erro: Data inválida para CUST004',
-    },
-    {
-      image: 'dGVzdGltYWdl',
-      customer_code: '', // Código do cliente vazio
-      measure_datetime: '2024-11-19T12:00:00Z',
-      measure_type: 'WATER',
-      description: 'Erro: Código do cliente vazio',
-    },
-    {
-      image: 'dGVzdGltYWdl',
-      customer_code: 'CUST005',
-      measure_datetime: '2024-11-19T12:00:00Z',
-      measure_type: 'INVALID', // Tipo de leitura inválido
-      description: 'Erro: Tipo de leitura inválido para CUST005',
-    },
-    {
-      image: 'dGVzdGltYWdl',
-      customer_code: 'CUST001', // Mesmo código e tipo de leitura que o primeiro caso
-      measure_datetime: '2024-11-01T12:00:00Z', // Data no mesmo mês
-      measure_type: 'WATER',
-      description: 'Erro: Leitura duplicada no mesmo mês para CUST001',
-    },
-  ];
-  
-  const findDuplicates = (billToFind: RequestBody): boolean => {
-    const results = testUploads.filter((upload) => upload.customer_code === billToFind.customer_code)
-    if(results.find((result)=> result.measure_datetime === billToFind.measure_datetime)){
-        return true;
-    } 
-    return false;
-  };
+        id: 3,
+        nome: "James Bond",
+        descricao: "Boa noite, sou James Bond. À seu dispor para um passeio suave e discreto. Aperte o cinto e aproveite a viagem.",
+        carro: "Aston Martin DB5 clássico",
+        comentario: "Serviço impecável! O motorista é a própria definição de classe e o carro é simplesmente magnífico.Uma experiência digna de um agente secreto.",
+        avaliacao: "5/5",
+        taxaPorKm: 10,
+        kmMinimo: 10
+    }
+];
 
-  const addToDB = (billToAdd: any)=>{
-
-    testUploads.push(billToAdd)
-
-  }
-
-
-  
-
-  export default findDuplicates
+export default motoristas
