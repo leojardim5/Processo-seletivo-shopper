@@ -4,6 +4,7 @@ import express, { Request, Response } from 'express';
 import routes from './routes/routes';
 import initializeDatabase from './model/modelConfig';
 
+
 const server = express();
 
 
@@ -18,13 +19,14 @@ server.get('/', (req: Request, res: Response) => {
 
 server.listen(8080, async () => {
     try {
-        await initializeDatabase(); // Inicializa o banco de dados
+        await initializeDatabase(); 
         console.log(`Servidor rodando na porta 8080`);
     } catch (error) {
         console.error("Erro ao iniciar o servidor:", error);
         process.exit(1);
     }
 });
+
 
 
 

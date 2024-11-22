@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const RideSchema = new mongoose_1.Schema({
-    customer_id: { type: String, required: true },
+    customerId: { type: String, required: true },
     origin: { type: String, required: true },
     destination: { type: String, required: true },
     distance: { type: Number, required: true },
@@ -38,13 +38,15 @@ const RideSchema = new mongoose_1.Schema({
 });
 const DriverSchema = new mongoose_1.Schema({
     id: { type: Number, required: true },
-    nome: { type: String, required: true },
-    descricao: { type: String, required: true },
-    carro: { type: String, required: true },
-    comentario: { type: String, required: true },
-    avaliacao: { type: String, required: true },
-    taxaPorKm: { type: Number, required: true },
-    kmMinimo: { type: Number, required: true },
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    vehicle: { type: String, required: true },
+    review: {
+        rating: { type: Number, required: true },
+        comment: { type: String, required: true },
+    },
+    ratePerKm: { type: Number, required: true },
+    minKm: { type: Number, required: true },
 });
 const Driver = mongoose_1.default.model("Driver", DriverSchema);
 const Ride = mongoose_1.default.model("Ride", RideSchema);

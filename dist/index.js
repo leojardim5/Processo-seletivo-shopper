@@ -17,6 +17,7 @@ const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
 const routes_1 = __importDefault(require("./routes/routes"));
 const modelConfig_1 = __importDefault(require("./model/modelConfig"));
+const model_1 = __importDefault(require("./model/model"));
 const server = (0, express_1.default)();
 server.use((0, cors_1.default)());
 server.use(body_parser_1.default.urlencoded({ extended: true }));
@@ -27,7 +28,7 @@ server.get('/', (req, res) => {
 });
 server.listen(8080, () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        yield (0, modelConfig_1.default)(); // Inicializa o banco de dados
+        yield (0, modelConfig_1.default)();
         console.log(`Servidor rodando na porta 8080`);
     }
     catch (error) {
@@ -35,3 +36,4 @@ server.listen(8080, () => __awaiter(void 0, void 0, void 0, function* () {
         process.exit(1);
     }
 }));
+(0, model_1.default)();

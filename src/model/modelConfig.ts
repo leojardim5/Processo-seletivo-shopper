@@ -25,6 +25,8 @@ const initializeDatabase = async () => {
             Schemas.Ride.createCollection(), 
             Schemas.Driver.createCollection()
         ]);
+        
+        
     } catch (error) {
         console.error("Erro ao inicializar o banco de dados:", error);
         process.exit(1);

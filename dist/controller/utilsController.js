@@ -13,67 +13,63 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
-const apiKey = "AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4";
 const Schemas_1 = __importDefault(require("../model/Schemas"));
 const utils = {
-    findCoordenadas: (endereco) => __awaiter(void 0, void 0, void 0, function* () {
+    validateRideRequest: ({ origin, destination, customerId, }) => {
+        if (!origin.trim() || !destination.trim() || !customerId.trim()) {
+            throw new Error("Origem, destino e ID do cliente não podem estar vazios.");
+        }
+        if (origin.trim() === destination.trim()) {
+            throw new Error("Origem e destino não podem ser iguais.");
+        }
+    },
+    findCoordinates: (address) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
         try {
-            const response = yield axios_1.default.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(endereco)}&key=${apiKey}`);
-            const coordinates = (_a = response.data.results[0]) === null || _a === void 0 ? void 0 : _a.geometry.location;
-            if (!coordinates) {
+            const response = yield axios_1.default.get(`https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4`);
+            const location = (_a = response.data.results[0]) === null || _a === void 0 ? void 0 : _a.geometry.location;
+            if (!location) {
                 throw new Error("Não foi possível obter as coordenadas para o endereço fornecido.");
             }
-            return coordinates;
+            return { latitude: location.lat, longitude: location.lng };
         }
         catch (error) {
-            console.error("Erro ao obter coordenadas:", error);
-            throw error;
+            console.error("Erro ao buscar coordenadas:", error);
+            throw new Error("Erro ao buscar coordenadas. Por favor, tente novamente.");
         }
     }),
-    retornarVetorMotoristas: (distance) => __awaiter(void 0, void 0, void 0, function* () {
-        const vetorCorrida = [];
+    getAvailableDrivers: (distance) => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const motoristas = yield Schemas_1.default.Driver.find();
-            if (!motoristas || motoristas.length === 0) {
-                throw new Error("Nenhum motorista encontrado.");
-            }
-            motoristas
-                .filter((motorista) => motorista.kmMinimo <= distance)
-                .forEach((motoristaFiltrado) => {
-                const corridaInterface = {
-                    id: motoristaFiltrado.id,
-                    name: motoristaFiltrado.nome,
-                    description: motoristaFiltrado.descricao,
-                    vehicle: motoristaFiltrado.carro,
-                    review: {
-                        comment: motoristaFiltrado.avaliacao.comment,
-                        rating: motoristaFiltrado.avaliacao.rating,
-                    },
-                    value: Math.round(distance * motoristaFiltrado.taxaPorKm * 100) / 100,
-                };
-                vetorCorrida.push(corridaInterface);
-            });
-            return vetorCorrida;
+            const drivers = yield Schemas_1.default.Driver.find();
+            if (!drivers.length)
+                throw new Error("Nenhum motorista disponível no momento.");
+            return drivers
+                .filter((driver) => driver.minKm <= distance)
+                .map((driver) => ({
+                id: driver.id,
+                name: driver.name,
+                description: driver.description,
+                vehicle: driver.vehicle,
+                review: driver.review,
+                price: Math.round(distance * driver.ratePerKm * 100) / 100,
+            }));
         }
         catch (error) {
             console.error("Erro ao buscar motoristas:", error);
-            throw error;
+            throw new Error("Erro ao buscar motoristas. Tente novamente mais tarde.");
         }
     }),
-    moldeDeRetornoCorrida: (info) => __awaiter(void 0, void 0, void 0, function* () {
-        console.log(info.duration);
-        const tempoDeCorridaMinutos = Math.floor(parseInt(info.duration.replace(/s/g, "")) / 60);
-        const distanciaDeCorridaKM = info.distance / 1000;
-        const infoDaCorridaRequisitada = {
-            origin: info.origin,
-            destination: info.destination,
-            duration: tempoDeCorridaMinutos,
-            distance: distanciaDeCorridaKM,
-            options: yield utils.retornarVetorMotoristas(distanciaDeCorridaKM),
-            routeResponse: info.routeResponse,
+    generateRideResponse: (apiResponse) => {
+        const durationMinutes = Math.floor(parseInt(apiResponse.duration.replace(/s/g, "")) / 60);
+        const distanceKm = apiResponse.distance / 1000;
+        return {
+            origin: apiResponse.origin,
+            destination: apiResponse.destination,
+            distance: distanceKm,
+            duration: durationMinutes,
+            options: [],
+            routeDetails: apiResponse.routeDetails,
         };
-        return infoDaCorridaRequisitada;
-    }),
+    },
 };
 exports.default = utils;

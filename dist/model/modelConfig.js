@@ -31,6 +31,7 @@ const initializeDatabase = () => __awaiter(void 0, void 0, void 0, function* () 
         console.log("Conexão com MongoDB realizada com sucesso!");
         yield Promise.all([
             Schemas_1.default.Ride.createCollection(),
+            Schemas_1.default.Driver.createCollection()
         ]);
     }
     catch (error) {

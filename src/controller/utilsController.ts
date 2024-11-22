@@ -1,129 +1,78 @@
 import axios from "axios";
-const apiKey = "AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4"
-import { RideResponse, RoutesApiResponse,Motorista,Option, Review } from "./interfacesController";
+import { RoutesApiResponse, RideResponse, DriverOption } from "./interfacesController";
 import Schemas from "../model/Schemas";
 
-
 const utils = {
+  validateRideRequest: ({
+    origin,
+    destination,
+    customerId,
+  }: {
+    origin: string;
+    destination: string;
+    customerId: string;
+  }): void => {
+    if (!origin.trim() || !destination.trim() || !customerId.trim()) {
+      throw new Error("Origem, destino e ID do cliente não podem estar vazios.");
+    }
 
-    findCoordenadas: async (endereco : string) => {
-        try {
-            const response = await axios.get(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(endereco)}&key=${apiKey}`
-            );
-            const coordinates = response.data.results[0]?.geometry.location;
-            if (!coordinates) {
-                throw new Error("Não foi possível obter as coordenadas para o endereço fornecido.");
-            }
-            return coordinates;
-        } catch (error) {
-            console.error("Erro ao obter coordenadas:", error);
-            throw error;
-        }
-        
-    },
-    
-    retornarVetorMotoristas: async (distance: number): Promise<Option[]> => {
-        const vetorCorrida: Option[] = [];
-    
-        try {
-            const motoristas:Motorista[] = await Schemas.Driver.find();
-    
-            if (!motoristas || motoristas.length === 0) {
-                throw new Error("Nenhum motorista encontrado.");
-            }
-    
-            motoristas
-                .filter((motorista) => motorista.kmMinimo <= distance)
-                .forEach((motoristaFiltrado) => {
-                    const corridaInterface: Option = {
-                        id: motoristaFiltrado.id,
-                        name: motoristaFiltrado.nome,
-                        description: motoristaFiltrado.descricao,
-                        vehicle: motoristaFiltrado.carro,
-                        review: {
-                            comment: motoristaFiltrado.avaliacao.comment,
-                            rating: motoristaFiltrado.avaliacao.rating,
-                        },
-                        value: Math.round(distance * motoristaFiltrado.taxaPorKm * 100) / 100,
-                    };
-    
-                    vetorCorrida.push(corridaInterface);
-                });
-                
-    
-            return vetorCorrida;
-        } catch (error) {
-            console.error("Erro ao buscar motoristas:", error);
-            throw error;
-        }
-    },
-    moldeDeRetornoCorrida:async (info : RoutesApiResponse)=>{
-        console.log(info.duration)
+    if (origin.trim() === destination.trim()) {
+      throw new Error("Origem e destino não podem ser iguais.");
+    }
+  },
 
-        const tempoDeCorridaMinutos = Math.floor(parseInt(info.duration.replace(/s/g, "")) / 60);
+  findCoordinates: async (address: string): Promise<{ latitude: number; longitude: number }> => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(
+          address
+        )}&key=AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4`
+      );
+      const location = response.data.results[0]?.geometry.location;
+      if (!location) {
+        throw new Error("Não foi possível obter as coordenadas para o endereço fornecido.");
+      }
+      return { latitude: location.lat, longitude: location.lng };
+    } catch (error) {
+      console.error("Erro ao buscar coordenadas:", error);
+      throw new Error("Erro ao buscar coordenadas. Por favor, tente novamente.");
+    }
+  },
 
-        const distanciaDeCorridaKM = info.distance / 1000
+  getAvailableDrivers: async (distance: number): Promise<DriverOption[]> => {
+    try {
+      const drivers = await Schemas.Driver.find();
+      if (!drivers.length) throw new Error("Nenhum motorista disponível no momento.");
 
-        const infoDaCorridaRequisitada:RideResponse = {
+      return drivers
+        .filter((driver) => driver.minKm <= distance)
+        .map((driver) => ({
+          id: driver.id,
+          name: driver.name,
+          description: driver.description,
+          vehicle: driver.vehicle,
+          review: driver.review,
+          price: Math.round(distance * driver.ratePerKm * 100) / 100,
+        }));
+    } catch (error) {
+      console.error("Erro ao buscar motoristas:", error);
+      throw new Error("Erro ao buscar motoristas. Tente novamente mais tarde.");
+    }
+  },
 
-            origin: info.origin,
-            destination: info.destination,
-            duration: tempoDeCorridaMinutos,
-            distance: distanciaDeCorridaKM,
-            options: await utils.retornarVetorMotoristas(distanciaDeCorridaKM),
-            routeResponse:info.routeResponse,
+  generateRideResponse: (apiResponse: RoutesApiResponse): RideResponse => {
+    const durationMinutes = Math.floor(parseInt(apiResponse.duration.replace(/s/g, "")) / 60);
+    const distanceKm = apiResponse.distance / 1000;
 
-        }
-       
-
-        return infoDaCorridaRequisitada
-
-
-    },
-    validarDadosViagem: (origin: string,destination: string,customer_id: string): { valid: boolean; error?: { error_code: string; error_description: string } } => {
-        
-        if (!origin || origin.trim() === "") {
-            return {
-                valid: false,
-                error: {
-                    error_code: "INVALID_DATA",
-                    error_description: "O endereço de origem não pode estar vazio.",
-                },
-            };
-        }
-        if (!destination || destination.trim() === "") {
-            return {
-                valid: false,
-                error: {
-                    error_code: "INVALID_DATA",
-                    error_description: "O endereço de destino não pode estar vazio.",
-                },
-            };
-        }
-        if (!customer_id || customer_id.trim() === "") {
-            return {
-                valid: false,
-                error: {
-                    error_code: "INVALID_DATA",
-                    error_description: "O ID do usuário não pode estar vazio.",
-                },
-            };
-        }
-        if (origin.trim() === destination.trim()) {
-            return {
-                valid: false,
-                error: {
-                    error_code: "INVALID_DATA",
-                    error_description: "Os endereços de origem e destino não podem ser os mesmos.",
-                },
-            };
-        }
-        return { valid: true };
-    },
+    return {
+      origin: apiResponse.origin,
+      destination: apiResponse.destination,
+      distance: distanceKm,
+      duration: durationMinutes,
+      options: [],
+      routeDetails: apiResponse.routeDetails,
+    };
+  },
 };
-    
 
-
-export default utils
-
+export default utils;

@@ -1,47 +1,36 @@
 export interface Review {
-    rating: number;
+    rating: number; 
     comment: string;
-}
-
-export interface Option {
+  }
+  
+  export interface DriverOption {
     id: number;
     name: string;
-    description: string;
-    vehicle: string;
-    review: Review;
-    value: number |any;
-}
-
-export interface RideResponse {
+    description: string; 
+    vehicle: string; 
+    review: Review; 
+    price: number; 
+  }
+  
+  export interface RideRequest {
+    customerId: string; 
+    origin: string; 
+    destination: string; 
+  }
+  
+  export interface RideResponse {
     origin: { latitude: number; longitude: number };
+    destination: { latitude: number; longitude: number }; 
+    distance: number; 
+    duration: number; 
+    options: DriverOption[]; 
+    routeDetails: object; 
+  }
+  
+  export interface RoutesApiResponse {
+    origin: { latitude: number; longitude: number }; 
     destination: { latitude: number; longitude: number };
     distance: number;
-    duration: string | number;
-    options: Option[];
-    routeResponse: object;
-}
-
-export interface RoutesApiResponse {
-
-    origin: { latitude: number; longitude: number };
-    destination: { latitude: number; longitude: number };
-    distance: number;
-    duration: string;
-    routeResponse: object;
-
-}
-
-export interface Motorista {
-    id: number;
-    nome: string;
-    descricao: string;
-    carro: string;
-    avaliacao: Review;
-    taxaPorKm: number,
-    kmMinimo: number ,
-    
-}
-
-
-
-
+    duration: string; 
+    routeDetails: object; 
+  }
