@@ -21,6 +21,7 @@
     "express": "^4.21.1",
     "joi": "^17.13.3",
     "mongodb": "^6.10.0",
+    "mongoose": "^8.8.2",
     "processo-seletivo-shopper": "file:",
     "sequelize": "^6.37.5",
     "sqlite3": "^5.1.7",

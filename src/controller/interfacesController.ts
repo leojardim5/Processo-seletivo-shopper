@@ -29,8 +29,6 @@ export interface RoutesApiResponse {
     duration: string;
     routeResponse: object;
 
-
-
 }
 
 export interface Motorista {
@@ -38,7 +36,7 @@ export interface Motorista {
     nome: string;
     descricao: string;
     carro: string;
-    avaliacao: string;
+    avaliacao: Review;
     taxaPorKm: number,
     kmMinimo: number ,
     

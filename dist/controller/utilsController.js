@@ -14,7 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const apiKey = "AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4";
-const modelMockado_1 = __importDefault(require("../model/modelMockado"));
+const Schemas_1 = __importDefault(require("../model/Schemas"));
 const utils = {
     findCoordenadas: (endereco) => __awaiter(void 0, void 0, void 0, function* () {
         var _a;
@@ -31,22 +31,37 @@ const utils = {
             throw error;
         }
     }),
-    retornarVetorMotoristas: (distance) => {
+    retornarVetorMotoristas: (distance) => __awaiter(void 0, void 0, void 0, function* () {
         const vetorCorrida = [];
-        modelMockado_1.default.filter(motorista => motorista.kmMinimo <= distance).map(motoristaFiltrado => {
-            const corridaInterface = {
-                id: motoristaFiltrado.id,
-                name: motoristaFiltrado.nome,
-                description: motoristaFiltrado.descricao,
-                vehicle: motoristaFiltrado.carro,
-                review: { comment: motoristaFiltrado.comentario, rating: parseInt(motoristaFiltrado.avaliacao) },
-                value: Math.round((distance * motoristaFiltrado.taxaPorKm) * 100) / 100
-            };
-            vetorCorrida.push(corridaInterface);
-        });
-        return vetorCorrida;
-    },
-    moldeDeRetornoCorrida: (info) => {
+        try {
+            const motoristas = yield Schemas_1.default.Driver.find();
+            if (!motoristas || motoristas.length === 0) {
+                throw new Error("Nenhum motorista encontrado.");
+            }
+            motoristas
+                .filter((motorista) => motorista.kmMinimo <= distance)
+                .forEach((motoristaFiltrado) => {
+                const corridaInterface = {
+                    id: motoristaFiltrado.id,
+                    name: motoristaFiltrado.nome,
+                    description: motoristaFiltrado.descricao,
+                    vehicle: motoristaFiltrado.carro,
+                    review: {
+                        comment: motoristaFiltrado.avaliacao.comment,
+                        rating: motoristaFiltrado.avaliacao.rating,
+                    },
+                    value: Math.round(distance * motoristaFiltrado.taxaPorKm * 100) / 100,
+                };
+                vetorCorrida.push(corridaInterface);
+            });
+            return vetorCorrida;
+        }
+        catch (error) {
+            console.error("Erro ao buscar motoristas:", error);
+            throw error;
+        }
+    }),
+    moldeDeRetornoCorrida: (info) => __awaiter(void 0, void 0, void 0, function* () {
         console.log(info.duration);
         const tempoDeCorridaMinutos = Math.floor(parseInt(info.duration.replace(/s/g, "")) / 60);
         const distanciaDeCorridaKM = info.distance / 1000;
@@ -55,10 +70,10 @@ const utils = {
             destination: info.destination,
             duration: tempoDeCorridaMinutos,
             distance: distanciaDeCorridaKM,
-            options: utils.retornarVetorMotoristas(distanciaDeCorridaKM),
+            options: yield utils.retornarVetorMotoristas(distanciaDeCorridaKM),
             routeResponse: info.routeResponse,
         };
         return infoDaCorridaRequisitada;
-    },
+    }),
 };
 exports.default = utils;
