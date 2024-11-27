@@ -25,7 +25,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 const RideSchema = new mongoose_1.Schema({
-    customerId: { type: String, required: true },
+    customer_id: { type: String, required: true },
     origin: { type: String, required: true },
     destination: { type: String, required: true },
     distance: { type: Number, required: true },
@@ -35,6 +35,7 @@ const RideSchema = new mongoose_1.Schema({
         name: { type: String, required: true },
     },
     value: { type: Number, required: true },
+    date: { type: String }
 });
 const DriverSchema = new mongoose_1.Schema({
     id: { type: Number, required: true },

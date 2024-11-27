@@ -8,4 +8,5 @@ const controller_1 = __importDefault(require("../controller/controller"));
 const routes = (0, express_1.default)();
 routes.post('/ride/estimate', (req, res, next) => controller_1.default.estimateRide(req, res));
 routes.patch('/ride/confirm', (req, res, next) => controller_1.default.confirmRide(req, res));
+routes.get('/ride/:customer_id', (req, res, next) => controller_1.default.getAllRides(req, res));
 exports.default = routes;

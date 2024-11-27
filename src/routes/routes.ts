@@ -8,6 +8,8 @@ routes.post('/ride/estimate', (req:Request,res:Response, next:NextFunction)=>fun
 
 routes.patch('/ride/confirm', (req:Request,res:Response, next:NextFunction)=>funcaoControllers.confirmRide(req,res))
 
+routes.get('/ride/:customer_id',(req:Request,res:Response, next:NextFunction)=>funcaoControllers.getAllRides(req,res))
+
 
 
   
