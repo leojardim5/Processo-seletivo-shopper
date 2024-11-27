@@ -7,6 +7,7 @@ services:
     ports:
       - "8080:8080"
       
+
     env_file: .env    
 
     environment:
@@ -14,6 +15,7 @@ services:
       - PORT=8080
     volumes:
       - ./shopperback:/usr/src/app
+      - /usr/src/app/node_modules
     depends_on:
       - mongo
 
@@ -29,6 +31,9 @@ services:
       - NODE_ENV=production
     volumes:
       - ./shopperfront:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/.next
+
     depends_on:
       - backend
 
