@@ -8,6 +8,7 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # Instalar dependências do backend
+COPY package*.json ./
 RUN npm install
 
 # Copiar o restante dos arquivos do backend

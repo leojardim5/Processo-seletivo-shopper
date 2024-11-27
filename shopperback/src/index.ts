@@ -3,6 +3,10 @@ import cors from 'cors';
 import express, { Request, Response } from 'express';
 import routes from './routes/routes';
 import initializeDatabase from './model/modelConfig';
+import dotenv from 'dotenv';
+
+
+dotenv.config();
 
 
 const server = express();
