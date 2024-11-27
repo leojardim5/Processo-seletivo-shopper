@@ -1,7 +1,10 @@
+
+
 node_modules
 .next
-*.log
+dist
 .git
+*.log
+.env
 .dockerignore
 Dockerfile
-.env

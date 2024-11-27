@@ -1,10 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import axios, { AxiosError } from 'axios';
-const apiKey = "AIzaSyCJdmA2JhQzA-beqlITN1hK8no5g6nV_m4"
 import utils from "./utilsController";
 import { RideResponseWithDrivers, RoutesApiFirstResponse, RideInterface } from "./interfacesController";
 import Schemas from "../model/Schemas";
-import { date } from "joi";
+const apiKey = process.env.GOOGLE_API_KEY;
 
 
 

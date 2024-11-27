@@ -85,7 +85,7 @@ const MainPage: React.FC = () => {
 
       <div className="col-span-3 bg-green-500 flex items-center justify-center">
         {view === "estimate" ? (
-          <div className="bg-gradient-to-b from-white to-gray-100 shadow-xl rounded-3xl p-8 w-full max-w-lg">
+          <div className="bg-gradient-to-b  from-white to-gray-100 shadow-xl rounded-3xl p-8 w-full max-w-lg">
             {infoFromApi === undefined ? (
               <form className="space-y-6" onSubmit={handleEstimate}>
                 <h1 className="text-4xl font-bold text-gray-800 text-center mb-6">Solicite sua Viagem</h1>
@@ -106,12 +106,7 @@ const MainPage: React.FC = () => {
             ) : (
               <>
                 <h1 className="text-4xl font-bold text-gray-800 text-center mb-6">Motoristas Disponíveis</h1>
-                <button
-                  onClick={() => setInfoFromApi(undefined)}
-                  className="mb-4 px-4 py-2 bg-gray-500 text-white rounded-lg shadow-md hover:bg-gray-600"
-                >
-                  Voltar para a Pesquisa
-                </button>
+                
                 <div className="h-96 overflow-y-auto">
                   {infoFromApi.options?.length > 0 ? (
                     infoFromApi.options.map((ride: Option) => (
@@ -125,8 +120,16 @@ const MainPage: React.FC = () => {
                   ) : (
                     <p className="text-gray-600 text-center">Nenhum motorista disponível no momento.</p>
                   )}
+                  
                 </div>
+                <button
+                  onClick={() => setInfoFromApi(undefined)}
+                  className="mt-4 px-4 py-2 bg-gray-500 text-white flex justify-center rounded-lg shadow-md hover:bg-gray-600"
+                >
+                  Voltar para a Pesquisa
+                </button>
               </>
+              
             )}
           </div>
         ) : (
