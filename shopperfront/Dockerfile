@@ -4,20 +4,20 @@ FROM node:20
 # Configuração do diretório de trabalho
 WORKDIR /usr/src/app
 
-# Copiar arquivos de configuração
+# Copiar arquivos do frontend
 COPY package*.json ./
 
-# Instalar dependências
+# Instalar dependências do frontend
 RUN npm install
 
-# Copiar todos os arquivos do projeto
+# Copiar o restante dos arquivos do frontend
 COPY . .
 
-# Executar o build do Next.js
+# Compilar o projeto Next.js
 RUN npm run build
 
 # Expor a porta 80
 EXPOSE 80
 
-# Iniciar o servidor de produção
+# Comando de inicialização
 CMD ["npm", "start"]
