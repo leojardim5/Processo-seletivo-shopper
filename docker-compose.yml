@@ -1,0 +1,39 @@
+version: '3.9'
+services:
+  backend:
+    build:
+      context: ./shopperback
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=production
+      - PORT=8080
+    volumes:
+      - ./shopperback:/usr/src/app
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./shopperfront
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ./shopperfront:/usr/src/app
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo:5
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
