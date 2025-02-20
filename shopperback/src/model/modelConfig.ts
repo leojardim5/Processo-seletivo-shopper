@@ -1,12 +1,21 @@
 import mongoose from "mongoose";
+import dotenv from "dotenv";
 import Schemas from "./Schemas";
+
+dotenv.config(); // Carrega variáveis do .env
 
 const connectDatabase = async () => {
     try {
-        
-        const mongoUri = "mongodb+srv://leoJardim:Leojardim13@clus.nlffmt6.mongodb.net/rides?retryWrites=true&w=majority";
+        const mongoUri = process.env.MONGO_URI; // Usa a variável de ambiente
 
-        await mongoose.connect(mongoUri)
+        if (!mongoUri) {
+            throw new Error("MONGO_URI não foi definida no arquivo .env");
+        }
+
+        await mongoose.connect(mongoUri, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
 
         console.log("Conectado ao MongoDB!");
     } catch (error) {
@@ -20,13 +29,11 @@ const initializeDatabase = async () => {
         await connectDatabase();
         console.log("Conexão com MongoDB realizada com sucesso!");
 
-        
         await Promise.all([
-            Schemas.Ride.createCollection(), 
-            Schemas.Driver.createCollection()
+            Schemas.Ride.createCollection(),
+            Schemas.Driver.createCollection(),
         ]);
-        
-        
+
     } catch (error) {
         console.error("Erro ao inicializar o banco de dados:", error);
         process.exit(1);
